@@ -323,6 +323,11 @@ public:
      */
     void writeJson(const QJsonDocument &document, int statusCode = OK);
 
+    /*
+     * @brief Get the underlying raw tcp socket for hijacking (eg websockets)
+     */
+    QTcpSocket *raw_socket_hijack();
+
 Q_SIGNALS:
 
     /**
@@ -349,6 +354,7 @@ protected:
 
 private:
 
+    bool raw_socket_hijacked;
     QHttpSocketPrivate *const d;
     friend class QHttpSocketPrivate;
 };

@@ -191,7 +191,8 @@ void QHttpSocketPrivate::readData()
 
 QHttpSocket::QHttpSocket(QTcpSocket *socket, QObject *parent)
     : QIODevice(parent),
-      d(new QHttpSocketPrivate(this, socket))
+      d(new QHttpSocketPrivate(this, socket)),
+      raw_socket_hijacked(false)
 {
     // The device is initially open for both reading and writing
     setOpenMode(QIODevice::ReadWrite);
@@ -219,7 +220,9 @@ void QHttpSocket::close()
     d->readState = QHttpSocketPrivate::ReadFinished;
     d->writeState = QHttpSocketPrivate::WriteFinished;
 
-    d->socket->close();
+    if( !raw_socket_hijacked ) {
+        d->socket->close();
+    }
 }
 
 bool QHttpSocket::isHeadersParsed() const
@@ -383,4 +386,11 @@ qint64 QHttpSocket::writeData(const char *data, qint64 len)
     }
 
     return d->socket->write(data, len);
+}
+
+QTcpSocket *QHttpSocket::raw_socket_hijack()
+{
+    raw_socket_hijacked = true;
+    d->socket->disconnect();
+    return d->socket;
 }
